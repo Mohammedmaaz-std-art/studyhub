@@ -39,7 +39,7 @@ git clone https://github.com/Mohammedmaaz-std-art/studyhub.git
 Example:
 
 ```text
-C:\laragon\www\
+C:\laragon\www\(folder
 ```
 
 ---
