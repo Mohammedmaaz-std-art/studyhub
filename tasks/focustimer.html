@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer — StudyHub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #050403;
+            color: #f5e6c8;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Top bar */
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 24px;
+            background: rgba(5,4,3,0.7);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .back-btn {
+            color: #f5e6c8;
+            text-decoration: none;
+            font-size: 13px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-btn:hover { opacity: 1; }
+
+        .task-info { text-align: center; }
+        .task-info .task-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f5e6c8;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .task-info .subject-name {
+            font-size: 12px;
+            color: #c2a14d;
+            margin-top: 2px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #c2a14d;
+        }
+
+        /* Main layout */
+        .main {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            gap: 48px;
+            padding: 80px 24px 24px;
+        }
+
+        /* Steps panel */
+        .steps-panel {
+            background: rgba(30,20,10,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(194,161,77,0.2);
+            border-radius: 14px;
+            padding: 20px;
+            width: 220px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        .steps-panel h4 {
+            font-size: 12px;
+            color: #c2a14d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+            color: #f5e6c8;
+            opacity: 0.8;
+        }
+        .step-item:last-child { border-bottom: none; }
+        .step-item input[type="checkbox"] { accent-color: #22c55e; margin-top: 2px; flex-shrink: 0; }
+        .step-item.done-step { text-decoration: line-through; opacity: 0.4; }
+
+        /* Timer section */
+        .timer-section { text-align: center; }
+
+        .circle {
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: conic-gradient(#22c55e 0deg, #1e293b 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 60px rgba(34,197,94,0.15), 0 0 120px rgba(0,0,0,0.5);
+            transition: background 0.8s linear;
+            animation: breathe 4s infinite ease-in-out;
+            margin: 0 auto 28px;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(34,197,94,0.15); }
+            50%       { transform: scale(1.04); box-shadow: 0 0 80px rgba(34,197,94,0.25); }
+        }
+
+        .inner {
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            background: #020617;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .timer-display {
+            font-size: 44px;
+            font-weight: 700;
+            color: #f5e6c8;
+            letter-spacing: 2px;
+        }
+
+        .timer-label {
+            font-size: 11px;
+            color: #c2a14d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Duration input for intermediate */
+        .duration-control {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .duration-control.visible { display: flex; }
+        .duration-btn {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(194,161,77,0.4);
+            background: rgba(30,20,10,0.6);
+            color: #c2a14d;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .duration-btn:hover { background: rgba(194,161,77,0.2); }
+        .duration-val {
+            font-size: 14px;
+            color: #f5e6c8;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Controls */
+        .controls { display: flex; gap: 12px; justify-content: center; }
+
+        .ctrl-btn {
+            padding: 11px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .btn-start  { background: #22c55e; color: #fff; }
+        .btn-start:hover  { background: #16a34a; }
+        .btn-pause  { background: #f59e0b; color: #fff; }
+        .btn-pause:hover  { background: #d97706; }
+        .btn-stop   { background: #ef4444; color: #fff; }
+        .btn-stop:hover   { background: #dc2626; }
+
+        /* Session stats below timer */
+        .session-stats {
+            margin-top: 20px;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            font-size: 12px;
+            color: #c2a14d;
+            opacity: 0.8;
+        }
+        .session-stats span strong { color: #f5e6c8; }
+
+        /* Pause Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .modal.open { display: flex; }
+
+        .modal-box {
+            background: #1e293b;
+            border: 1px solid rgba(194,161,77,0.3);
+            padding: 32px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 360px;
+            width: 90%;
+        }
+        .modal-box h3 { font-size: 18px; margin-bottom: 8px; color: #f5e6c8; }
+        .modal-box p  { font-size: 13px; color: #c2a14d; margin-bottom: 24px; }
+
+        .reason-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+        .reason-btn {
+            padding: 11px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #f5e6c8;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .reason-btn:hover { background: rgba(255,255,255,0.1); border-color: #c2a14d; }
+        .reason-btn.selected { background: rgba(194,161,77,0.15); border-color: #c2a14d; }
+
+        /* Response panel shown after selecting reason */
+        .response-panel {
+            display: none;
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .response-panel.show { display: block; }
+        .response-panel .response-msg {
+            font-size: 13px;
+            color: #f5e6c8;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .response-panel .response-action {
+            font-size: 12px;
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        /* Timebox input */
+        .timebox-input {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+        .timebox-input.show { display: flex; }
+        .timebox-input label { font-size: 13px; color: #c2a14d; }
+        .timebox-val {
+            width: 70px;
+            padding: 7px 10px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(194,161,77,0.4);
+            border-radius: 8px;
+            color: #f5e6c8;
+            font-size: 15px;
+            text-align: center;
+            font-family: inherit;
+            outline: none;
+        }
+        .timebox-val:focus { border-color: #c2a14d; }
+
+        /* Overwhelm input */
+        .focus-input {
+            display: none;
+            margin-bottom: 16px;
+        }
+        .focus-input.show { display: block; }
+        .focus-input label { font-size: 12px; color: #c2a14d; display: block; margin-bottom: 6px; }
+        .focus-input input {
+            width: 100%;
+            padding: 9px 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(194,161,77,0.3);
+            border-radius: 8px;
+            color: #f5e6c8;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+        .focus-input input:focus { border-color: #c2a14d; }
+        .focus-input input::placeholder { color: rgba(245,230,200,0.3); }
+
+        .continue-btn {
+            width: 100%;
+            padding: 11px;
+            background: #22c55e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .continue-btn:hover { background: #16a34a; }
+
+        /* Completion Modal */
+        .complete-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+        }
+        .complete-modal.open { display: flex; }
+
+        .complete-box {
+            background: linear-gradient(135deg, #0f2010, #1e293b);
+            border: 1px solid rgba(34,197,94,0.4);
+            padding: 40px 36px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 0 60px rgba(34,197,94,0.15);
+        }
+
+        .complete-icon { font-size: 48px; margin-bottom: 16px; }
+        .complete-box h2 { font-size: 22px; color: #22c55e; margin-bottom: 8px; }
+        .complete-box p  { font-size: 13px; color: #c2a14d; margin-bottom: 24px; }
+
+        .complete-stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+        .complete-stat .val { font-size: 24px; font-weight: 700; color: #f5e6c8; }
+        .complete-stat .lbl { font-size: 11px; color: #c2a14d; margin-top: 2px; }
+
+        .complete-actions { display: flex; gap: 10px; }
+        .btn-done {
+            flex: 1; padding: 11px;
+            background: #22c55e; color: #fff;
+            border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: inherit;
+        }
+        .btn-another {
+            flex: 1; padding: 11px;
+            background: rgba(255,255,255,0.08); color: #f5e6c8;
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;
+            font-size: 14px; cursor: pointer; font-family: inherit;
+        }
+
+        /* Loading state */
+        .loading { opacity: 0.4; }
+    </style>
+</head>
+<body>
+
+<canvas id="sandCanvas"></canvas>
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <a href="index.php" class="back-btn">← Back to Tasks</a>
+    <div class="task-info">
+        <div class="task-name" id="taskName">Loading task...</div>
+        <div class="subject-name" id="subjectName">—</div>
+    </div>
+    <div class="top-right">
+        <span id="topStats">—</span>
+    </div>
+</div>
+
+<!-- Main Layout -->
+<div class="main" id="mainContent">
+
+    <!-- Steps Panel (left) -->
+    <div class="steps-panel" id="stepsPanel">
+        <h4>Checklist</h4>
+        <div id="stepsList"></div>
+    </div>
+
+    <!-- Timer Section (center) -->
+    <div class="timer-section">
+
+        <!-- Duration control (intermediate only) -->
+        <div class="duration-control" id="durationControl">
+            <button class="duration-btn" onclick="changeDuration(-5)">−</button>
+            <span class="duration-val" id="durationVal">25 min</span>
+            <button class="duration-btn" onclick="changeDuration(5)">+</button>
+        </div>
+
+        <div class="circle" id="progressCircle">
+            <div class="inner">
+                <div class="timer-display" id="timer">25:00</div>
+                <div class="timer-label" id="timerLabel">Focus</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="ctrl-btn btn-start" onclick="startTimer()">▶ Start</button>
+            <button class="ctrl-btn btn-pause" onclick="pauseTimer()">⏸ Pause</button>
+            <button class="ctrl-btn btn-stop"  onclick="stopTimer()">■ Stop</button>
+        </div>
+
+        <div class="session-stats">
+            <span>Est: <strong id="estMin">—</strong></span>
+            <span>Elapsed: <strong id="elapsedMin">0 min</strong></span>
+            <span>Due: <strong id="dueDate">—</strong></span>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Pause Modal -->
+<div class="modal" id="pauseModal">
+    <div class="modal-box">
+        <h3 id="pauseTitle">Why did you pause?</h3>
+        <p id="pauseSubtitle">No judgment — just honest.</p>
+
+        <!-- BEGINNER reasons -->
+        <div class="reason-btns" id="beginnerReasons">
+            <button class="reason-btn" onclick="selectReason(this, 'distracted')">
+                📱 Got distracted / can't start
+            </button>
+            <button class="reason-btn" onclick="selectReason(this, 'notime')">
+                ⏰ Don't have enough time right now
+            </button>
+        </div>
+
+        <!-- INTERMEDIATE reasons -->
+        <div class="reason-btns" id="intermediateReasons" style="display:none;">
+            <button class="reason-btn" onclick="selectReason(this, 'overwhelmed')">
+                🌊 Feeling overwhelmed
+            </button>
+            <button class="reason-btn" onclick="selectReason(this, 'interrupted')">
+                🔔 Got interrupted / no time
+            </button>
+        </div>
+
+        <!-- Response panel — shown after selecting -->
+        <div class="response-panel" id="responsePanel">
+            <div class="response-msg" id="responseMsg"></div>
+            <div class="response-action" id="responseAction"></div>
+        </div>
+
+        <!-- Timebox input — for notime / interrupted -->
+        <div class="timebox-input" id="timeboxInput">
+            <label>Minutes you have right now:</label>
+            <input type="number" class="timebox-val" id="timeboxVal" value="10" min="5" max="120">
+        </div>
+
+        <!-- Focus input — for overwhelmed -->
+        <div class="focus-input" id="focusInput">
+            <label>What ONE thing can you finish this session?</label>
+            <input type="text" id="focusGoal" placeholder="e.g. Read pages 10–20">
+        </div>
+
+        <button class="continue-btn" id="continueBtn" onclick="continueTimer()">
+            Continue Session
+        </button>
+    </div>
+</div>
+
+<!-- Completion Modal -->
+<div class="complete-modal" id="completeModal">
+    <div class="complete-box">
+        <div class="complete-icon">🎉</div>
+        <h2>Session Complete!</h2>
+        <p id="completeMsg">Great work. Your session has been logged.</p>
+        <div class="complete-stats">
+            <div class="complete-stat">
+                <div class="val" id="completedMin">—</div>
+                <div class="lbl">Minutes Studied</div>
+            </div>
+            <div class="complete-stat">
+                <div class="val" id="completedTask">—</div>
+                <div class="lbl">Task</div>
+            </div>
+        </div>
+        <div class="complete-actions">
+            <button class="btn-done" onclick="finishAndGo()">✓ Mark Done & Exit</button>
+            <button class="btn-another" onclick="resetAndStay()">↺ Another Round</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+const params    = new URLSearchParams(window.location.search);
+const task_id   = params.get('task_id');
+const USER_ROLE = params.get('role') || 'beginner';
+
+let time          = 25 * 60;
+let totalTime     = 25 * 60;
+let customMinutes = 25;
+let interval;
+let pauseTime;
+let elapsedSeconds = 0;
+let state = 'IDLE'; // IDLE | RUNNING | PAUSED
+let selectedReason = '';
+let taskData = null;
+
+// ─── Load Task ────────────────────────────────────────────
+if (task_id) {
+    fetch(`get_task.php?id=${task_id}`)
+        .then(r => r.json())
+        .then(task => {
+            if (task.error) {
+                document.getElementById('taskName').textContent = 'Task not found';
+                return;
+            }
+            taskData = task;
+
+            document.getElementById('taskName').textContent    = task.title;
+            document.getElementById('subjectName').textContent = task.subject_name;
+            document.getElementById('estMin').textContent      = task.estimated_minutes + ' min';
+            document.getElementById('dueDate').textContent     = task.due_date
+                ? new Date(task.due_date).toLocaleDateString('en-IN', {day:'numeric', month:'short'})
+                : 'No due date';
+            document.title = task.title + ' — Focus Timer';
+
+            // Set timer to estimated minutes
+            customMinutes = task.estimated_minutes || 25;
+            totalTime = customMinutes * 60;
+            time      = totalTime;
+            formatTime();
+            document.getElementById('durationVal').textContent = customMinutes + ' min';
+
+            // Show duration control for intermediate
+            if (task.role === 'intermediate' || true) {
+                // Show for all — beginner has fixed, intermediate can change
+            }
+
+            // Load steps
+            if (task.steps && task.steps.length > 0) {
+                const panel = document.getElementById('stepsPanel');
+                const list  = document.getElementById('stepsList');
+                panel.style.display = 'block';
+                task.steps.forEach(step => {
+                    const div = document.createElement('div');
+                    div.className = 'step-item' + (step.is_done ? ' done-step' : '');
+                    div.innerHTML = `
+                        <input type="checkbox" ${step.is_done ? 'checked' : ''}
+                               onchange="toggleStep(${step.id}, this.checked)">
+                        <span>${step.step_text}</span>`;
+                    list.appendChild(div);
+                });
+            }
+
+            // Top stats
+            document.getElementById('topStats').textContent =
+                task.priority.toUpperCase() + ' priority';
+        });
+} else {
+    document.getElementById('taskName').textContent    = 'Free Session';
+    document.getElementById('subjectName').textContent = 'No task selected';
+}
+
+// ─── Timer Logic ──────────────────────────────────────────
+function formatTime() {
+    const min = Math.floor(time / 60);
+    const sec = time % 60;
+    document.getElementById('timer').textContent =
+        `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+    const progress = (1 - time / totalTime) * 360;
+    document.getElementById('progressCircle').style.background =
+        `conic-gradient(#22c55e ${progress}deg, #1e293b ${progress}deg)`;
+
+    const elapsed = Math.round((totalTime - time) / 60);
+    document.getElementById('elapsedMin').textContent = elapsed + ' min';
+}
+
+function startTimer() {
+    if (state === 'RUNNING') return;
+    state = 'RUNNING';
+    document.getElementById('timerLabel').textContent = 'Focus';
+    clearInterval(interval);
+    interval = setInterval(() => {
+        if (time > 0) {
+            time--;
+            elapsedSeconds++;
+            formatTime();
+            updateSand();
+        } else {
+            clearInterval(interval);
+            state = 'IDLE';
+            onTimerComplete();
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    if (state !== 'RUNNING') return;
+    state = 'PAUSED';
+    clearInterval(interval);
+    pauseTime = Date.now();
+    document.getElementById('timerLabel').textContent = 'Paused';
+    speedMultiplier = 3;
+
+    // Reset modal state
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('responsePanel').classList.remove('show');
+    document.getElementById('timeboxInput').classList.remove('show');
+    document.getElementById('focusInput').classList.remove('show');
+    document.getElementById('continueBtn').textContent = 'Continue Session';
+    selectedReason = '';
+
+    // Show correct reasons based on role
+    const role = USER_ROLE;
+    if (role === 'intermediate') {
+        document.getElementById('beginnerReasons').style.display    = 'none';
+        document.getElementById('intermediateReasons').style.display = 'flex';
+        document.getElementById('pauseTitle').textContent    = "What's happening?";
+        document.getElementById('pauseSubtitle').textContent = 'Let\'s adjust and keep going.';
+    } else {
+        document.getElementById('beginnerReasons').style.display    = 'flex';
+        document.getElementById('intermediateReasons').style.display = 'none';
+        document.getElementById('pauseTitle').textContent    = 'Why did you pause?';
+        document.getElementById('pauseSubtitle').textContent = 'No judgment — just honest.';
+    }
+
+    document.getElementById('pauseModal').classList.add('open');
+}
+
+function selectReason(btn, reason) {
+    document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedReason = reason;
+
+    // Hide all extras first
+    document.getElementById('responsePanel').classList.remove('show');
+    document.getElementById('timeboxInput').classList.remove('show');
+    document.getElementById('focusInput').classList.remove('show');
+    document.getElementById('continueBtn').textContent = 'Continue Session';
+
+    const msgEl    = document.getElementById('responseMsg');
+    const actionEl = document.getElementById('responseAction');
+    const panel    = document.getElementById('responsePanel');
+
+    // ── BEGINNER ─────────────────────────────────────────────
+    if (reason === 'distracted') {
+        time      = 5 * 60;
+        totalTime = 5 * 60;
+        formatTime();
+        msgEl.textContent    = "Scrolling gave your brain a dopamine hit. Now it resists work — that's biology, not laziness.";
+        actionEl.textContent = '⏱ Timer set to 5 minutes. Just 5. Reels after, promise.';
+        panel.classList.add('show');
+        document.getElementById('continueBtn').textContent = 'Start 5-Minute Round';
+    }
+
+    else if (reason === 'notime') {
+        msgEl.textContent    = "10 focused minutes beats 0 distracted ones. Your brain builds the habit either way.";
+        actionEl.textContent = '↓ Set how many minutes you actually have:';
+        panel.classList.add('show');
+        document.getElementById('timeboxInput').classList.add('show');
+        document.getElementById('continueBtn').textContent = 'Start Timebox';
+    }
+
+    // ── INTERMEDIATE ──────────────────────────────────────────
+    else if (reason === 'overwhelmed') {
+        msgEl.textContent    = "Your brain is holding too many open loops. Nothing gets done when everything feels urgent.";
+        actionEl.textContent = '↓ Name ONE thing to finish this session:';
+        panel.classList.add('show');
+        document.getElementById('focusInput').classList.add('show');
+        document.getElementById('continueBtn').textContent = 'Refocus & Continue';
+    }
+
+    else if (reason === 'interrupted') {
+        msgEl.textContent    = "Real life interrupts. Timeboxing what's left beats abandoning it entirely.";
+        actionEl.textContent = '↓ How many minutes do you have right now?';
+        panel.classList.add('show');
+        document.getElementById('timeboxInput').classList.add('show');
+        document.getElementById('continueBtn').textContent = 'Start Timebox';
+    }
+}
+
+function continueTimer() {
+    document.getElementById('pauseModal').classList.remove('open');
+
+    // Apply timebox
+    if (selectedReason === 'notime' || selectedReason === 'interrupted') {
+        const mins = parseInt(document.getElementById('timeboxVal').value) || 10;
+        time      = mins * 60;
+        totalTime = mins * 60;
+        formatTime();
+    }
+
+    // Show focus goal as toast
+    if (selectedReason === 'overwhelmed') {
+        const goal = document.getElementById('focusGoal').value.trim();
+        if (goal) showToast('Focus: ' + goal);
+    }
+
+    speedMultiplier = 1;
+    selectedReason  = '';
+    startTimer();
+}
+
+function stopTimer() {
+    clearInterval(interval);
+    state = 'IDLE';
+    if (elapsedSeconds > 30) {
+        onTimerComplete();
+    } else {
+        time      = totalTime;
+        elapsedSeconds = 0;
+        sandHeight = 0;
+        formatTime();
+    }
+}
+
+function onTimerComplete() {
+    clearInterval(interval);
+    const minutesStudied = Math.max(1, Math.round(elapsedSeconds / 60));
+    document.getElementById('completedMin').textContent = minutesStudied;
+    document.getElementById('completedTask').textContent =
+        taskData ? taskData.title.substring(0, 20) + (taskData.title.length > 20 ? '…' : '') : 'Free session';
+    document.getElementById('completeModal').classList.add('open');
+
+    // Log session immediately
+    if (task_id) {
+        fetch('../progress/mark_complete.php', {
+            method: 'POST',
+            body: new URLSearchParams({
+                task_id,
+                duration_minutes: minutesStudied,
+                mark_done: 0
+            })
+        });
+    }
+}
+
+function finishAndGo() {
+    if (task_id) {
+        fetch('../progress/mark_complete.php', {
+            method: 'POST',
+            body: new URLSearchParams({ task_id, duration_minutes: 0, mark_done: 1 })
+        }).then(() => {
+            window.location.href = 'index.php';
+        });
+    } else {
+        window.location.href = 'index.php';
+    }
+}
+
+function resetAndStay() {
+    document.getElementById('completeModal').classList.remove('open');
+    time = totalTime;
+    elapsedSeconds = 0;
+    sandHeight = 0;
+    state = 'IDLE';
+    formatTime();
+}
+
+// ─── Duration Control (shown for all, functional for intermediate) ──
+function changeDuration(delta) {
+    if (state === 'RUNNING') return;
+    customMinutes = Math.max(5, customMinutes + delta);
+    totalTime = customMinutes * 60;
+    time = totalTime;
+    document.getElementById('durationVal').textContent = customMinutes + ' min';
+    formatTime();
+}
+
+// ─── Step toggle ──────────────────────────────────────────
+function toggleStep(stepId, isDone) {
+    fetch('update_step.php', {
+        method: 'POST',
+        body: new URLSearchParams({ id: stepId, is_done: isDone ? 1 : 0 })
+    });
+}
+
+// ─── Toast ────────────────────────────────────────────────
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;z-index:200;';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+}
+
+// ─── Sand System ──────────────────────────────────────────
+const canvas = document.getElementById('sandCanvas');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let particles      = [];
+let speedMultiplier = 1;
+let sandHeight     = 0;
+
+function updateSand() {
+    const progress = elapsedSeconds / totalTime;
+    sandHeight = progress * canvas.height * 0.7;
+}
+
+class Particle {
+    constructor() {
+        this.reset();
+        this.y    = Math.random() * canvas.height;
+        this.size = Math.random() * 4.2 + 1;
+        this.speedY = Math.random() * 1.8 + 1;
+        this.opacity = Math.random() * 6.2 + 0.3;
+    }
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -10;
+    }
+    update() {
+        const floor = canvas.height - sandHeight;
+        if (this.y < floor) {
+            this.y += this.speedY * speedMultiplier;
+        } else {
+            this.reset();
+        }
+    }
+    draw() {
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = '#e6c36a';
+        ctx.fillRect(this.x, this.y, this.size, this.size);
+        ctx.globalAlpha = 1;
+    }
+}
+
+function initParticles() {
+    for (let i = 0; i < 180; i++) particles.push(new Particle());
+}
+
+function drawBackground() {
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#08060a');
+    gradient.addColorStop(1, '#050403');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawSandBase() {
+    if (sandHeight <= 0) return;
+    const center = canvas.width / 2;
+
+    // Sand gradient
+    const sandGrad = ctx.createLinearGradient(0, canvas.height - sandHeight, 0, canvas.height);
+    sandGrad.addColorStop(0, 'rgba(194,161,77,0.6)');
+    sandGrad.addColorStop(0.4, 'rgba(194,161,77,0.85)');
+    sandGrad.addColorStop(1, 'rgba(160,120,40,0.95)');
+
+    ctx.fillStyle = sandGrad;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+
+    for (let x = 0; x <= canvas.width; x += 4) {
+        const d = Math.abs(x - center) / center;
+        const y = canvas.height - sandHeight * (1 - d * 0.5) + Math.sin(x * 0.015 + Date.now() * 0.001) * 4;
+        ctx.lineTo(x, y);
+    }
+
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+
+    // Shine line on top of sand
+    ctx.strokeStyle = 'rgba(245,210,122,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let x = 0; x <= canvas.width; x += 4) {
+        const d = Math.abs(x - center) / center;
+        const y = canvas.height - sandHeight * (1 - d * 0.5) + Math.sin(x * 0.015 + Date.now() * 0.001) * 4;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+}
+
+function animate() {
+    drawBackground();
+    drawSandBase();
+
+    particles.forEach(p => { p.update(); p.draw(); });
+
+    // Dim UI as sand rises
+    const ratio = sandHeight / (canvas.height * 0.7);
+    if (ratio > 0.7) {
+        document.getElementById('mainContent').style.opacity = Math.max(0.3, 1 - (ratio - 0.7) * 2);
+    } else {
+        document.getElementById('mainContent').style.opacity = 1;
+    }
+
+    requestAnimationFrame(animate);
+}
+
+initParticles();
+animate();
+formatTime();
+</script>
+</body>
+</html>

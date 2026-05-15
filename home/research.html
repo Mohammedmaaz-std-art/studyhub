@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research — StudyHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060508;--bg2:#0d0b10;--bg3:#13101a;--green:#22c55e;--g2:#16a34a;--sand:#c2a14d;--pur:#a78bfa;--text:#f0eaf8;--muted:rgba(240,234,248,0.45)x;--bdr:rgba(255,255,255,0.07);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 60px;background:rgba(6,5,8,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:var(--green);}
+.nav-links{display:flex;gap:36px;}
+.nav-links a{font-size:14px;color:var(--muted);transition:color .2s;}
+.nav-links a:hover,.nav-links a.active{color:var(--text);}
+.nav-cta{padding:9px 22px;background:var(--green);color:#fff;border-radius:30px;font-size:13px;font-weight:600;transition:all .2s;}
+.nav-cta:hover{background:var(--g2);}
+.sep{height:1px;background:linear-gradient(90deg,transparent,var(--bdr),transparent);}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:12px;display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* PAGE HERO */
+.page-hero{padding:160px 60px 80px;max-width:900px;margin:0 auto;text-align:center;}
+.page-hero h1{font-family:'Syne',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:20px;animation:fadeUp .7s ease both;}
+.page-hero h1 span{color:var(--green);}
+.page-hero p{font-size:17px;color:var(--muted);max-width:540px;margin:0 auto;line-height:1.75;animation:fadeUp .7s .15s ease both;}
+
+/* PRINCIPLES */
+.principles-wrap{max-width:1000px;margin:0 auto;padding:80px 60px;}
+.principles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:40px;}
+.principle-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;padding:28px 24px;transition:border-color .2s;}
+.principle-card:hover{border-color:rgba(34,197,94,.25);}
+.pc-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:rgba(34,197,94,.15);line-height:1;margin-bottom:12px;}
+.pc-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.pc-body{font-size:13px;color:var(--muted);line-height:1.7;}
+.pc-tag{display:inline-block;margin-top:12px;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:rgba(34,197,94,.1);color:var(--green);}
+
+/* RESEARCH CARDS */
+.research-wrap{max-width:1000px;margin:0 auto;padding:0 60px 80px;}
+.research-grid{display:flex;flex-direction:column;gap:16px;margin-top:40px;}
+.research-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:16px;padding:28px 32px;display:grid;grid-template-columns:60px 1fr;gap:24px;align-items:start;transition:border-color .2s;}
+.research-card:hover{border-color:rgba(34,197,94,.2);}
+.rc-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:rgba(34,197,94,.2);line-height:1;}
+.rc-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.rc-author{font-size:12px;color:var(--sand);margin-bottom:10px;}
+.rc-body{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;}
+.rc-used{font-size:12px;color:var(--green);}
+.rc-link{display:inline-block;margin-top:8px;font-size:11px;color:rgba(194,161,77,.6);border-bottom:1px solid rgba(194,161,77,.2);transition:color .2s;}
+.rc-link:hover{color:var(--sand);}
+
+/* BEHAVIOR MAP */
+.bmap-wrap{max-width:1000px;margin:0 auto;padding:0 60px 80px;}
+.bmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;}
+.bmap-card{border-radius:14px;padding:24px;border:1px solid var(--bdr);}
+.bmap-card.beg{background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.12);}
+.bmap-card.mid{background:rgba(167,139,250,.04);border-color:rgba(167,139,250,.12);}
+.bmap-role{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:block;}
+.beg .bmap-role{color:var(--green);}
+.mid .bmap-role{color:var(--pur);}
+.bmap-card h4{font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px;}
+.bmap-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bdr);}
+.bmap-row:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.bmap-trigger{font-size:11px;color:var(--muted);padding:6px 10px;background:rgba(255,255,255,.03);border-radius:7px;border:1px solid var(--bdr);}
+.bmap-arrow{font-size:14px;color:var(--muted);text-align:center;}
+.bmap-response{font-size:11px;padding:6px 10px;border-radius:7px;}
+.beg .bmap-response{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.mid .bmap-response{background:rgba(167,139,250,.1);color:var(--pur);border:1px solid rgba(167,139,250,.2);}
+
+/* DISCLAIMER */
+.disclaimer{max-width:1000px;margin:0 auto;padding:0 60px 80px;}
+.disc-box{background:rgba(255,255,255,.02);border:1px solid var(--bdr);border-radius:12px;padding:24px 28px;}
+.disc-box p{font-size:13px;color:var(--muted);line-height:1.8;}
+.disc-box strong{color:var(--text);}
+
+/* CTA */
+.cta{text-align:center;padding:100px 60px;position:relative;overflow:hidden;}
+.cta-glow{position:absolute;width:600px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,.07) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.cta h2{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,44px);font-weight:800;color:var(--text);margin-bottom:14px;}
+.cta p{font-size:15px;color:var(--muted);margin-bottom:32px;}
+.btn-primary{padding:14px 34px;background:var(--green);color:#fff;border-radius:30px;font-size:15px;font-weight:600;transition:all .25s;display:inline-block;}
+.btn-primary:hover{background:var(--g2);transform:translateY(-2px);}
+footer{border-top:1px solid var(--bdr);padding:28px 60px;display:flex;justify-content:space-between;align-items:center;}
+footer .f-logo{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--muted);}
+footer .f-links{display:flex;gap:28px;}
+footer .f-links a{font-size:13px;color:rgba(240,234,248,.3);transition:color .2s;}
+footer .f-links a:hover{color:var(--muted);}
+.nav-cta{padding:9px 22px;background:var(--green);color:#fff;border-radius:30px;font-size:13px;font-weight:600;transition:all .2s;}
+.nav-ca{padding:9px 22px;background:transparent;color:#fff;border-radius:30px;font-size:13px;font-weight:600;transition:all .2s; border:3px solid white;}
+.nav-cta:hover{background:var(--g2); gap:4px;}
+.nav-ca:hover{background:var(--g2);}
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="logo-dot"></span>StudyHub</div>
+  <div class="nav-links">
+    <a href=".././index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="features.html">Features</a>
+    <a href="research.html" class="active">Research</a>
+  </div>
+  <div class="bts">
+    <a href="../auth/login.html" class="nav-ca">Sign In</a>
+    <a href="../auth/register.php" class="nav-cta">Sign Up</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <h1>Research.<br><span>Not random.</span></h1>
+  <p>Every behavioral decision in StudyHub is grounded in published psychology and neuroscience research. This page documents exactly what informed what.</p>
+</div>
+
+<div class="sep"></div>
+
+<!-- CORE PRINCIPLES -->
+<div class="principles-wrap reveal">
+  <span class="eyebrow">Core Principles</span>
+  <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,36px);font-weight:800;color:var(--text);margin-bottom:12px;">Three ideas this system is built on.</h2>
+  <p style="font-size:15px;color:var(--muted);max-width:500px;line-height:1.75;">Not productivity hacks. Behavioral science applied to the specific context of student study behavior.</p>
+
+  <div class="principles-grid">
+    <div class="principle-card">
+      <div class="pc-num">01</div>
+      <div class="pc-title">The problem is emotional, not motivational</div>
+      <div class="pc-body">Students don't procrastinate because they lack willpower. They procrastinate because tasks trigger negative emotions — anxiety, boredom, self-doubt. The brain seeks relief through distraction. This is task aversion, not laziness.</div>
+      <span class="pc-tag">Sirois & Pychyl, 2013</span>
+    </div>
+    <div class="principle-card">
+      <div class="pc-num">02</div>
+      <div class="pc-title">Starting is the hardest part — so make it tiny</div>
+      <div class="pc-body">Implementation intentions (if-then plans) dramatically increase task completion. "When I sit down, I will study for 5 minutes" bypasses the emotional resistance that kills larger intentions. Small commitments that are kept build neural pathways.</div>
+      <span class="pc-tag">Gollwitzer, 1999</span>
+    </div>
+    <div class="principle-card">
+      <div class="pc-num">03</div>
+      <div class="pc-title">Visible time creates honest urgency</div>
+      <div class="pc-body">When time is invisible, the brain systematically underestimates duration — enabling procrastination. Making time physically visible (sand falling) activates temporal awareness without the anxiety of a digital countdown. Urgency without threat.</div>
+      <span class="pc-tag">Steel & König, 2006</span>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- RESEARCH CARDS -->
+<div class="research-wrap reveal">
+  <span class="eyebrow">Academic References</span>
+  <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,36px);font-weight:800;color:var(--text);margin-bottom:12px;">Seven studies. Seven design decisions.</h2>
+  <p style="font-size:15px;color:var(--muted);max-width:500px;line-height:1.75;">Each reference maps directly to a feature in the system. Not decoration — documentation.</p>
+
+  <div class="research-grid">
+
+    <div class="research-card">
+      <div class="rc-num">01</div>
+      <div>
+        <div class="rc-title">Implementation Intentions: Strong Effects of Simple Plans</div>
+        <div class="rc-author">Gollwitzer, P.M. (1999) — American Psychologist, 54(7), 493–503</div>
+        <div class="rc-body">If-then planning dramatically increases goal completion by pre-deciding responses to anticipated obstacles. Specific plans bypass the motivational failures that kill vague intentions.</div>
+        <div class="rc-used">→ Used in: Pause modal design · 5-minute rescue mode · "Name one thing" prompt</div>
+        <a href="https://doi.org/10.1037/0003-066X.54.7.493" target="_blank" class="rc-link">doi.org/10.1037/0003-066X.54.7.493 ↗</a>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">02</div>
+      <div>
+        <div class="rc-title">Integrating Theories of Motivation (Temporal Motivation Theory)</div>
+        <div class="rc-author">Steel, P. & König, C.J. (2006) — Academy of Management Review, 31(4), 889–913</div>
+        <div class="rc-body">Motivation is a function of the expected value of a task and its temporal distance. Tasks far in the future feel less urgent regardless of importance. Visual time pressure closes this gap.</div>
+        <div class="rc-used">→ Used in: Sand timer design · time pressure psychology · urgency without anxiety</div>
+        <a href="https://doi.org/10.5465/amr.2006.22527462" target="_blank" class="rc-link">doi.org/10.5465/amr.2006.22527462 ↗</a>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">03</div>
+      <div>
+        <div class="rc-title">Procrastination and the Priority of Short-Term Mood Regulation</div>
+        <div class="rc-author">Sirois, F. & Pychyl, T. (2013) — Social & Personality Psychology Compass, 7(2), 115–127</div>
+        <div class="rc-body">Procrastination is primarily an emotion regulation problem, not a time management problem. Students avoid tasks because they trigger negative affect. Relief-seeking through distraction feels better short-term but compounds the problem.</div>
+        <div class="rc-used">→ Used in: Beginner distraction intervention · non-judgmental pause modal tone · reward framing</div>
+        <a href="https://doi.org/10.1111/spc3.12011" target="_blank" class="rc-link">doi.org/10.1111/spc3.12011 ↗</a>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">04</div>
+      <div>
+        <div class="rc-title">Nasal Respiration Entrains Human Limbic Oscillations and Modulates Cognitive Function</div>
+        <div class="rc-author">Zelano, C. et al. (2016) — Journal of Neuroscience, 36(49), 12448–12467</div>
+        <div class="rc-body">Breathing rhythm synchronizes with neural oscillations in the limbic system. Slow, rhythmic breathing activates the parasympathetic nervous system — reducing cortisol and creating conditions for sustained focus.</div>
+        <div class="rc-used">→ Used in: Timer circle breathing animation (4-second pulse cycle)</div>
+        <a href="https://doi.org/10.1523/JNEUROSCI.2586-16.2016" target="_blank" class="rc-link">doi.org/10.1523/JNEUROSCI.2586-16.2016 ↗</a>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">05</div>
+      <div>
+        <div class="rc-title">Über das Behalten von erledigten und unerledigten Handlungen (Zeigarnik Effect)</div>
+        <div class="rc-author">Zeigarnik, B. (1927) — Psychologische Forschung, 9, 1–85</div>
+        <div class="rc-body">Incomplete tasks create persistent mental tension — a cognitive intrusion that occupies working memory until resolved. Intermediate learners studying many subjects simultaneously carry dozens of open loops, generating chronic background anxiety.</div>
+        <div class="rc-used">→ Used in: "Name one thing" intervention · understanding intermediate overwhelm · task decomposition design</div>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">06</div>
+      <div>
+        <div class="rc-title">Flow: The Psychology of Optimal Experience</div>
+        <div class="rc-author">Csikszentmihalyi, M. (1990) — Harper & Row, New York. ISBN: 978-0-06-092043-2</div>
+        <div class="rc-body">Flow states occur in the narrow band between boredom (challenge too low) and anxiety (challenge too high). The timer's design targets this band — creating enough time pressure to prevent boredom without the anxiety of a hard deadline.</div>
+        <div class="rc-used">→ Used in: Timer difficulty calibration · role-based session length design</div>
+      </div>
+    </div>
+
+    <div class="research-card">
+      <div class="rc-num">07</div>
+      <div>
+        <div class="rc-title">Procrastination, Emotion Regulation, and Well-Being</div>
+        <div class="rc-author">Pychyl, T.A. & Sirois, F.M. (2016) — In Procrastination, Health, and Well-Being. Academic Press, 163–188</div>
+        <div class="rc-body">The distinction between difficulty-based procrastination (beginners) and pressure-based avoidance (intermediate learners) requires fundamentally different interventions. Treating both identically is why most productivity tools fail students.</div>
+        <div class="rc-used">→ Used in: Role system design · Beginner vs Intermediate behavioral distinction · pause modal branching</div>
+        <a href="https://doi.org/10.1016/B978-0-12-802862-9.00008-6" target="_blank" class="rc-link">doi.org/10.1016/B978-0-12-802862-9.00008-6 ↗</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- BEHAVIOR MAP -->
+<div class="bmap-wrap reveal">
+  <span class="eyebrow">Behavioral Design Map</span>
+  <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,36px);font-weight:800;color:var(--text);margin-bottom:12px;">Trigger → Response.</h2>
+  <p style="font-size:15px;color:var(--muted);max-width:500px;line-height:1.75;">The pause modal maps each identified failure trigger to a specific behavioral response — different per role.</p>
+
+  <div class="bmap-grid">
+    <div class="bmap-card beg">
+      <span class="bmap-role">Beginner</span>
+      <h4>Habit formation barriers</h4>
+      <div class="bmap-row">
+        <div class="bmap-trigger">📱 Got distracted</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">5-min rescue + reward framing</div>
+      </div>
+      <div class="bmap-row">
+        <div class="bmap-trigger">⏰ No time</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">Timebox input: set exact minutes</div>
+      </div>
+      <div class="bmap-row">
+        <div class="bmap-trigger">😶 Can't start</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">Friction removal: tiny commitment</div>
+      </div>
+    </div>
+    <div class="bmap-card mid">
+      <span class="bmap-role">Intermediate</span>
+      <h4>Pressure & overwhelm barriers</h4>
+      <div class="bmap-row">
+        <div class="bmap-trigger">🌊 Overwhelmed</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">Name ONE thing — close loops</div>
+      </div>
+      <div class="bmap-row">
+        <div class="bmap-trigger">🔔 Interrupted</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">Timebox what's left — don't abandon</div>
+      </div>
+      <div class="bmap-row">
+        <div class="bmap-trigger">🔥 Perfectionism</div>
+        <div class="bmap-arrow">→</div>
+        <div class="bmap-response">Progress beats perfect — resume</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer reveal">
+  <div class="disc-box">
+    <p><strong>Academic integrity note:</strong> StudyHub applies principles from published behavioral psychology research to interface and interaction design. The citations above are real, peer-reviewed publications. The application of these principles to a student study system is the original contribution of this project. StudyHub does not claim to provide clinical psychological support — it is a productivity tool informed by behavioral science, built for student use in an academic context.</p>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- CTA -->
+<div class="cta reveal">
+  <div class="cta-glow"></div>
+  <h2>Grounded in science.<br>Built for students.</h2>
+  <p>Now that you know why it works — try it yourself.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <a href="../auth/login.html" class="btn-primary">Start Studying →</a>
+    <a href="about.html" style="padding:14px 34px;border:1px solid rgba(240,234,248,.15);color:var(--muted);border-radius:30px;font-size:15px;display:inline-block;transition:all .2s;">Read About Page</a>
+  </div>
+</div>
+
+<footer>
+  <div class="f-logo">📚 StudyHub</div>
+  <div class="f-links">
+    <a href=".././index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="features.html">Features</a>
+    <a href="../auth/login.html">Login</a>
+    <a href="../auth/register.php">Register</a>
+  </div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if(el.isIntersecting) el.target.classList.add('visible'); });
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
